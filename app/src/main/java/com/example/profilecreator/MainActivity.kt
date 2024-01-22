@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +35,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.codingtroops.profilecardlayout.UserProfile
+import com.codingtroops.profilecardlayout.userProfileList
 import com.example.profilecreator.ui.theme.ProfileCreatorTheme
 import com.example.profilecreator.ui.theme.*
 
@@ -43,13 +47,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainScreen(UserList)
+            MainScreen(userProfileList)
         }
     }
 }
 
 @Composable
-fun MainScreen(UserList: List<UserData>) {
+fun MainScreen(userList: List<UserProfile>) {
 
     Scaffold(topBar = { AppToolBar(stringResource(id = R.string.application_title)) }) { paddingValues ->
         Surface(
@@ -60,7 +64,7 @@ fun MainScreen(UserList: List<UserData>) {
         ) {
 
             LazyColumn() {
-                items(UserList) { user ->
+                items(userList) { user ->
                     ProfileCard(user)
                 }
             }
@@ -89,7 +93,7 @@ fun AppToolBar(toolBarTitle: String) {
 }
 
 @Composable
-fun ProfileCard(user: UserData) {
+fun ProfileCard(user: UserProfile) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,8 +116,9 @@ fun ProfileCard(user: UserData) {
     }
 }
 
+@OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ProfilePicture(user: UserData) {
+fun ProfilePicture(user: UserProfile) {
 
     val green = Color.Green
     val red = Color.Red
@@ -130,17 +135,27 @@ fun ProfilePicture(user: UserData) {
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
         shape = CircleShape
     ) {
-        Image(
-            painter = painterResource(id = user.drawable),
-            contentDescription = "Content Description",
+
+        GlideImage(
+            model = user.pictureUrl,
+            contentDescription = null,
             modifier = Modifier.size(60.dp),
             contentScale = ContentScale.Crop
+
         )
+
+
+//        Image(
+//            painter = painterResource(id = user.drawable),
+//            contentDescription = "Content Description",
+//            modifier = Modifier.size(60.dp),
+//            contentScale = ContentScale.Crop
+//        )
     }
 }
 
 @Composable
-fun ProfileContent(user: UserData) {
+fun ProfileContent(user: UserProfile) {
     Column(
         modifier = Modifier
             .padding(8.dp)
@@ -159,6 +174,6 @@ fun ProfileContent(user: UserData) {
 @Composable
 fun GreetingPreview() {
     ProfileCreatorTheme {
-        MainScreen(UserList)
+        MainScreen(userProfileList)
     }
 }

@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.example.profilecreator'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.example.profilecreator"
@@ -68,4 +68,6 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    implementation "com.github.bumptech.glide:compose:1.0.0-beta01"
 }

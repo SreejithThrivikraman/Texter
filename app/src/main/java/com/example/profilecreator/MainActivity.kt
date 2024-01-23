@@ -34,7 +34,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -48,8 +51,15 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MainScreen(userProfileList)
+            UserScreen(userProfileList[0])
         }
     }
+}
+
+@Composable
+fun appNavigator(){
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "")
 }
 
 @Composable
@@ -59,8 +69,7 @@ fun MainScreen(userList: List<UserProfile>) {
         Surface(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            color = Color.LightGray
+                .padding(paddingValues), color = Color.LightGray
         ) {
 
             LazyColumn() {
@@ -81,15 +90,11 @@ fun AppToolBar(toolBarTitle: String) {
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = PaleBlue),
         navigationIcon = {
             Icon(
-                imageVector = Icons.Filled.Home,
-                contentDescription = stringResource(
+                imageVector = Icons.Filled.Home, contentDescription = stringResource(
                     id = R.string.menu_title,
-                ),
-                tint = Color.White,
-                modifier = Modifier.padding(start = 10.dp)
+                ), tint = Color.White, modifier = Modifier.padding(start = 10.dp)
             )
-        }
-    )
+        })
 }
 
 @Composable
@@ -107,18 +112,15 @@ fun ProfileCard(user: UserProfile) {
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            ProfilePicture(user)
-            ProfileContent(user)
-
-
+            ProfilePicture(user, 60.dp)
+            ProfileContent(user, Alignment.Start)
         }
     }
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
 @Composable
-fun ProfilePicture(user: UserProfile) {
+fun ProfilePicture(user: UserProfile, picSize: Dp) {
 
     val green = Color.Green
     val red = Color.Red
@@ -128,6 +130,7 @@ fun ProfilePicture(user: UserProfile) {
     } else {
         red
     }
+
 
     Card(
         modifier = Modifier.padding(16.dp),
@@ -139,40 +142,69 @@ fun ProfilePicture(user: UserProfile) {
         GlideImage(
             model = user.pictureUrl,
             contentDescription = null,
-            modifier = Modifier.size(60.dp),
+            modifier = Modifier.size(picSize),
             contentScale = ContentScale.Crop
 
         )
-
-
-//        Image(
-//            painter = painterResource(id = user.drawable),
-//            contentDescription = "Content Description",
-//            modifier = Modifier.size(60.dp),
-//            contentScale = ContentScale.Crop
-//        )
     }
 }
 
 @Composable
-fun ProfileContent(user: UserProfile) {
+fun ProfileContent(user: UserProfile, position: Alignment.Horizontal) {
+    val black = Color.Black
+    val gray = Color.Gray
+    val statusTextColor: Color = if (user.status) {
+        black
+    } else {
+        gray
+    }
     Column(
         modifier = Modifier
             .padding(8.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        horizontalAlignment = position
     ) {
         Text(text = user.name, style = MaterialTheme.typography.headlineMedium)
         Text(
             text = if (user.status) "Active Now" else "Offline",
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = statusTextColor
         )
+    }
+}
+
+@Composable
+fun UserScreen(user: UserProfile) {
+
+    Scaffold(topBar = { AppToolBar(stringResource(id = R.string.application_title)) }) { paddingValues ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues), color = Color.LightGray
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ProfilePicture(user, 210.dp)
+                ProfileContent(user, Alignment.CenterHorizontally)
+            }
+        }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun UserProfilePreview() {
+    ProfileCreatorTheme {
+        UserScreen(userProfileList[0])
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun MainScreenPreview() {
     ProfileCreatorTheme {
         MainScreen(userProfileList)
     }

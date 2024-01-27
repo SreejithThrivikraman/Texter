@@ -1,9 +1,11 @@
 package com.example.profilecreator
 
 import android.os.Bundle
+import android.service.autofill.OnClickAction
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,7 +38,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
@@ -50,20 +55,27 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MainScreen(userProfileList)
+            appNavigator()
+        }
+    }
+}
+
+@Composable
+fun appNavigator(userList: List<UserProfile> = userProfileList){
+    val navController = rememberNavController()
+    NavHost(navController = navController , startDestination = "main-screen") {
+        composable("main-screen") {
+            MainScreen(userList,navController)
+        }
+
+        composable("user_profile"){
             UserScreen(userProfileList[0])
         }
     }
 }
 
 @Composable
-fun appNavigator(){
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "")
-}
-
-@Composable
-fun MainScreen(userList: List<UserProfile>) {
+fun MainScreen(userList: List<UserProfile>,navController: NavHostController?) {
 
     Scaffold(topBar = { AppToolBar(stringResource(id = R.string.application_title)) }) { paddingValues ->
         Surface(
@@ -74,7 +86,9 @@ fun MainScreen(userList: List<UserProfile>) {
 
             LazyColumn() {
                 items(userList) { user ->
-                    ProfileCard(user)
+                    ProfileCard(user) {
+                        navController?.navigate("user_profile")
+                    }
                 }
             }
         }
@@ -98,12 +112,13 @@ fun AppToolBar(toolBarTitle: String) {
 }
 
 @Composable
-fun ProfileCard(user: UserProfile) {
+fun ProfileCard(user: UserProfile, clickAction: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 8.dp, bottom = 4.dp, start = 10.dp, end = 10.dp)
-            .wrapContentHeight(align = Alignment.Top),
+            .wrapContentHeight(align = Alignment.Top)
+            .clickable { clickAction.invoke() },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
 
         ) {
@@ -206,6 +221,6 @@ fun UserProfilePreview() {
 @Composable
 fun MainScreenPreview() {
     ProfileCreatorTheme {
-        MainScreen(userProfileList)
+        MainScreen(userProfileList,null)
     }
 }

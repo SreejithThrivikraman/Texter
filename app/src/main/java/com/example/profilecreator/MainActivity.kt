@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,28 +65,33 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun appNavigator(userList: List<UserProfile> = userProfileList){
+fun appNavigator(userList: List<UserProfile> = userProfileList) {
     val navController = rememberNavController()
-    NavHost(navController = navController , startDestination = "main-screen") {
+    NavHost(navController = navController, startDestination = "main-screen") {
         composable("main-screen") {
-            MainScreen(userList,navController)
+            MainScreen(userList, navController)
         }
 
-        composable("user_profile/{userId}",
-            arguments = listOf(navArgument("userId"){
+        composable(
+            "user_profile/{userId}",
+            arguments = listOf(navArgument("userId") {
                 type = NavType.IntType
             })
-        ){
+        ) {
             val parm = it.arguments?.getInt("userId")
-            UserScreen(userProfileList[parm!!])
+            UserScreen(userProfileList[parm!!],navController)
         }
     }
 }
 
 @Composable
-fun MainScreen(userList: List<UserProfile>,navController: NavHostController?) {
+fun MainScreen(userList: List<UserProfile>, navController: NavHostController?) {
 
-    Scaffold(topBar = { AppToolBar(stringResource(id = R.string.application_title)) }) { paddingValues ->
+    Scaffold(topBar = {
+        AppToolBar(toolBarTitle = "Colleague Status", icon = Icons.Filled.Home) {
+
+        }
+    }) { paddingValues ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,16 +111,19 @@ fun MainScreen(userList: List<UserProfile>,navController: NavHostController?) {
 
 
 @Composable
-fun AppToolBar(toolBarTitle: String) {
+fun AppToolBar(toolBarTitle: String, icon: ImageVector, onIconClick: () -> Unit) {
     CenterAlignedTopAppBar(title = {
         Text(text = "$toolBarTitle", color = Color.White)
     },
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = PaleBlue),
         navigationIcon = {
             Icon(
-                imageVector = Icons.Filled.Home, contentDescription = stringResource(
+                imageVector = icon, contentDescription = stringResource(
                     id = R.string.menu_title,
-                ), tint = Color.White, modifier = Modifier.padding(start = 10.dp)
+                ), tint = Color.White,
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .clickable { onIconClick.invoke() }
             )
         })
 }
@@ -196,9 +206,16 @@ fun ProfileContent(user: UserProfile, position: Alignment.Horizontal) {
 }
 
 @Composable
-fun UserScreen(user: UserProfile) {
+fun UserScreen(user: UserProfile, navController: NavHostController?) {
 
-    Scaffold(topBar = { AppToolBar(stringResource(id = R.string.application_title)) }) { paddingValues ->
+    Scaffold(topBar = {
+        AppToolBar(
+            toolBarTitle = "User Status",
+            icon = Icons.Filled.ArrowBack
+        ) {
+            navController?.navigateUp()
+        }
+    }) { paddingValues ->
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -220,7 +237,7 @@ fun UserScreen(user: UserProfile) {
 @Composable
 fun UserProfilePreview() {
     ProfileCreatorTheme {
-        UserScreen(userProfileList[0])
+        UserScreen(userProfileList[0],null)
     }
 }
 
@@ -228,6 +245,6 @@ fun UserProfilePreview() {
 @Composable
 fun MainScreenPreview() {
     ProfileCreatorTheme {
-        MainScreen(userProfileList,null)
+        MainScreen(userProfileList, null)
     }
 }

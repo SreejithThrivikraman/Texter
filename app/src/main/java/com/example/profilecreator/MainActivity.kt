@@ -40,9 +40,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.bumptech.glide.Glide
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
@@ -68,8 +70,13 @@ fun appNavigator(userList: List<UserProfile> = userProfileList){
             MainScreen(userList,navController)
         }
 
-        composable("user_profile"){
-            UserScreen(userProfileList[0])
+        composable("user_profile/{userId}",
+            arguments = listOf(navArgument("userId"){
+                type = NavType.IntType
+            })
+        ){
+            val parm = it.arguments?.getInt("userId")
+            UserScreen(userProfileList[parm!!])
         }
     }
 }
@@ -87,7 +94,7 @@ fun MainScreen(userList: List<UserProfile>,navController: NavHostController?) {
             LazyColumn() {
                 items(userList) { user ->
                     ProfileCard(user) {
-                        navController?.navigate("user_profile")
+                        navController?.navigate("user_profile/${user.id}")
                     }
                 }
             }
